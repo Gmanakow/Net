@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact name="net_02_client:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/net_02_client_jar</output-path>
+    <root id="root">
+      <element id="archive" name="net_02_client.jar">
+        <element id="module-output" name="net_02_client" />
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/main/java/META-INF/MANIFEST.MF" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
