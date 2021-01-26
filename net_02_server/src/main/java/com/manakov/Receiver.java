@@ -119,7 +119,7 @@ public class Receiver {
         }
     }
 
-    private String readFileName(InputStream inputStream, int nameLength) throws IOException {
+    private String readFileName(InputStream inputStream, int nameLength) throws IOException{
         byte[] buffer = new byte[nameLength];
         if (!(inputStream.read(buffer) > 0)) throw new IOException("err while reading fileName : " + number);
         return new String(buffer);

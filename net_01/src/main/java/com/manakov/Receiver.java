@@ -31,7 +31,6 @@ public class Receiver {
                 0
         );
 
-        table = new Hashtable<>();
     }
 
     public void startReceiving(){
