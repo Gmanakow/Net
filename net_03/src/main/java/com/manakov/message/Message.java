@@ -6,6 +6,8 @@ import java.util.UUID;
 public class Message {
     public int type = -1;
 
+    public int response = 0;
+
     public String sourceAddress = "";
     public int port = -1;
 
@@ -15,8 +17,12 @@ public class Message {
     public String data = "";
     public UUID id = null;
 
-    public Message(int type, String data, String sourceAddress, int port, String destAddress, int destPort){
+    public int counter = 0;
+
+    public Message(int type, int response, String data, String sourceAddress, int port, String destAddress, int destPort){
         this.type = type;
+
+        this.response = response;
 
         this.sourceAddress = sourceAddress;
         this.port = port;
@@ -28,8 +34,9 @@ public class Message {
         this.id = UUID.randomUUID();
     }
 
-    public Message(int type, String data, String sourceAddress, int port, String destAddress, int destPort, UUID id){
+    public Message(int type, int response, String data, String sourceAddress, int port, String destAddress, int destPort, UUID id){
         this.type = type;
+        this.response = response;
         this.sourceAddress = sourceAddress;
         this.port = port;
         this.destAddress = destAddress;
@@ -44,6 +51,8 @@ public class Message {
 
         byteBuffer.rewind();
         this.type = byteBuffer.getInt();
+
+        this.response = byteBuffer.getInt();
 
         int addressLength = byteBuffer.getInt();
         byte[] addressBytes = new byte[addressLength];
@@ -72,7 +81,10 @@ public class Message {
 
     public byte[] toByte(){
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
+
         byteBuffer.putInt(type);
+
+        byteBuffer.putInt(response);
 
         byteBuffer.putInt(sourceAddress.length());
         byteBuffer.put(sourceAddress.getBytes());

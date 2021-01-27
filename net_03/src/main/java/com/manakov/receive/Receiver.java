@@ -47,8 +47,9 @@ public class Receiver {
             try{
                 socket.receive(packet);
 
-                int rand = ThreadLocalRandom.current().nextInt(0, 99);
+                int rand = ThreadLocalRandom.current().nextInt(1, 99);
                 if (rand < node.lossPercent) continue;
+
 
                 Message message = new Message(packet.getData());
                 InetSocketAddress sourceISAddress = new InetSocketAddress(
@@ -56,30 +57,62 @@ public class Receiver {
                         message.port
                 );
 
-                switch (message.type){
-                    case (0) : // textMessage received
-                        node.sendResponse(message, sourceISAddress);
-                        node.printText(message);
-                        node.sendText(message, sourceISAddress);
+//                System.out.println("got " +  message.type + " " + message.response + " from " + message.port);
+
+                switch (message.type) {
+                    case (0): // textMessage received
+                        if (message.response == 0) {
+                            node.sendResponse(message, sourceISAddress);
+                            node.printText(message);
+                            node.sendText(message, sourceISAddress);
+                        } else {
+                            node.table.remove(message.id);
+                        }
                         break;
-                    case (1) : //  a new child is saying "hi" to his root
-                        node.sendResponse(message, sourceISAddress);
-                        node.acceptChild(sourceISAddress);
+                    case (1): //  a new child is saying "hi" to his root
+                        if (message.response == 0) {
+                            node.sendResponse(message, sourceISAddress);
+                            String prevData[] = message.data.split(" ");
+                            node.acceptChild(sourceISAddress, prevData);
+                        } else {
+                            node.setParentAddress(sourceISAddress);
+                            node.table.remove(message.id);
+                        }
                         break;
-                    case (2) : // node is getting a new backUp
-                        node.sendResponse(message, sourceISAddress);
-                        String data[] = message.data.split(" ");
-                        node.backUpAddress = new InetSocketAddress(
-                                InetAddress.getByName(data[0]),
-                                Integer.parseInt(data[1])
-                        );
+                    case (2): // got a backUpCall. answering
+                        if (message.response == 0){
+                            node.sendResponse(message, sourceISAddress);
+                            node.sendBackUp(sourceISAddress);
+                        } else {
+                            node.table.remove(message.id);
+                        }
                         break;
-                    case (3) : // got a backUpCall. answering
-                        node.sendResponse(message, sourceISAddress);
-                        node.sendBackUp(sourceISAddress);
+                    case (3): // node is getting a new backUp
+                        if (message.response == 0) {
+                            node.sendResponse(message, sourceISAddress);
+                            String backUpData[] = message.data.split(" ");
+                            if (backUpData.length == 2) {
+                                node.backUpAddress = new InetSocketAddress(
+                                        InetAddress.getByName(backUpData[0]),
+                                        Integer.parseInt(backUpData[1])
+                                );
+                            } else {
+                                node.backUpAddress = null;
+                            }
+                        } else {
+                            node.table.remove(message.id);
+                        }
                         break;
-                    case (4) : // responce
-                        node.table.remove(message.id);
+                    case (4): // message, that a certain node is not responding.
+                        if (message.response == 0) {
+                            node.sendResponse(message, sourceISAddress);
+                            String missingData[] = message.data.split(" ");
+                            node.checkMissing(missingData[0], Integer.parseInt(missingData[1]));
+                            node.sendNodeMissing(missingData[0], Integer.parseInt(missingData[1]), sourceISAddress);
+
+                        } else {
+                            node.table.remove(message.id);
+                        }
                         break;
                 }
             } catch (SocketTimeoutException e){

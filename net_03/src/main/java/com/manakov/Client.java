@@ -35,20 +35,9 @@ public class Client
         node.startReceiving();
         node.startReading();
 
-        switch (node.nodeType) {
-            case (0) :
-                // the node is root, do nothing;
-                break;
-            case (1) :
-                // the node is a child, say hi to your root;
-                sender.sendHi();
-                node.requestBackUp(node.parentAddress);
-                break;
+        if (node.nodeType == 1) {
+            node.sendHi(node.holdAddress, null);
         }
-
-
-
-
     }
 
 
